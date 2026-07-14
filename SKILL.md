@@ -1,23 +1,24 @@
 ---
 name: codex-internal-agent-orchestration
-description: Coordinate complex coding and knowledge-work tasks with Codex's current main agent and in-task internal subagents. Use for multi-agent task graphs, parallel read-only exploration, disjoint implementation slices, long-running supervision, Harness task packages, evidence collection, adversarial review, and final integration.
+description: Coordinate complex coding and knowledge-work tasks inside a user's target repository with Codex's current main agent and in-task internal subagents. Use for multi-agent task graphs, parallel exploration, disjoint implementation slices, long-running supervision, evidence collection, adversarial review, final integration, and Harness Anything task/decision/fact workflows when the target repository has adopted Harness Anything.
 ---
 
 # Codex 内部 Agent 编排
 
 ## 执行范围
 
-使用当前 Codex 主 Agent，以及当前任务内通过 Codex 协作工具启动的内部 subagent。仓库本地命令、测试、构建和 Harness 用于执行与记录证据。内部 subagent 工具不可用时，由主 Agent 本地完成或向用户说明能力限制。
+使用当前 Codex 主 Agent，以及当前任务内通过 Codex 协作工具启动的内部 subagent。仓库本地命令、测试和构建用于执行；目标仓库接入 Harness Anything 时，用 `ha` 记录任务、决策、事实与证据。内部 subagent 工具不可用时，由主 Agent 本地完成或向用户说明能力限制。
 
 ## 先判定是否派活
 
 依次检查：
 
-1. **任务成立吗？** 先读原始材料或做最小测量。
-2. **委托总成本更低吗？** 计入写 packet、等待、回读、冲突、集成和复验；主 Agent 更快就直接做。
-3. **旁路有独立价值吗？** 只为可并行切片、上下文卸载、专项侦察或独立复核派活。
-4. **边界能独立验收吗？** 写任务必须有唯一 ownership、明确依赖和可观察证据。
-5. **同一路径已失败两次吗？** 连续两次没有新证据就熔断，由主 Agent 接管、缩小任务或向用户升级。
+1. **任务成立吗？** 先读原始材料或做最小测量，证伪错误前提比执行错误任务更重要。
+2. **主 Agent 已能写出确切 diff 吗？** 已知改动且路径短时直接做，避免把委托固定成本包装成管理。
+3. **委托总成本更低吗？** 计入 packet、等待、回读、冲突、集成和复验。
+4. **是否存在长尾价值？** 大量侦察、试错、测量、上下文卸载或独立复核才值得派活。
+5. **边界能独立验收吗？** 每条线必须有清晰语义面、依赖、协调边界和可观察证据。
+6. **同一路径已失败两次吗？** 连续两次没有新证据就熔断，由主 Agent 接管、缩小任务或向用户升级。
 
 不为填满并发槽派 Agent。用户指定数量时遵从上位指令，但仍使用最小写面并说明成本或冲突。
 
@@ -27,11 +28,13 @@ description: Coordinate complex coding and knowledge-work tasks with Codex's cur
 
 - Mission：目标、非目标、原始依据、真实使用入口。
 - Graph：任务、依赖、关键路径、可并行节点。
-- Ownership：每条线唯一 owner、write set、共享面、集成 owner。
+- Ownership：每条线唯一 owner、预期写面、冲突/保护面、集成 owner。
 - Budget：Agent 数、并发、时间或尝试预算，以及取消、接管和升级条件。
 - Acceptance：主 Agent 将亲自回读的 diff、测试、日志、截图或真实入口。
 
-没有独立写面就不要并行写。读取可以重叠；高耦合生产代码保持单写者。模板见 [references/delegation-templates.md](references/delegation-templates.md)。
+默认按一条连贯语义线切成一个完整包，不预防性切成大量微任务；只有依赖、风险隔离或写面冲突要求时再拆细。读取可以重叠；高耦合代码保持单写者。
+
+每个委托包必须回答五问：**Context**、**Request**、**Output Format**、**Constraints**、**Checkpoint**。Context 至少给 canonical 原文、why/首位使用者、验收者视角、系统地图和真实验收入口。预期文件只是地图，不是信息围栏；Worker 可读全仓理解根因，但不得触碰正在冲突或受保护的写面。模板见 [references/delegation-templates.md](references/delegation-templates.md)。
 
 ## 选择内部角色
 
@@ -54,7 +57,9 @@ description: Coordinate complex coding and knowledge-work tasks with Codex's cur
 
 ## Harness 投影
 
-检测到 `harness/harness.yaml` 或仓库明确要求 Harness 时，仅在已有 task、非平凡多协作者工作、跨回合监管或承重证据需要时投影任务图。短小单步任务不因 Harness 存在自动新建 task。具体规则见 [references/harness-orchestration.md](references/harness-orchestration.md)。
+本技能用于在**用户自己的目标仓库**中使用 Harness Anything，不携带 Harness Anything 源码仓库的开发流程。检测到 `harness/harness.yaml` 或目标仓治理明确要求时，仅在已有 task、非平凡多协作者工作、跨回合监管或承重证据需要时投影任务图。短小单步任务不因 Harness 存在自动新建 task。
+
+每次通过 `ha capabilities --json`、各原语的 capabilities 与 `ha <kind> --help` 发现当前命令面，不背诵固定参数。主 Agent 自己也必须使用要求 Worker 使用的记录系统；排期、裁决、事实与关系不能只留在聊天里。具体协议见 [references/harness-orchestration.md](references/harness-orchestration.md)。
 
 ## 主 Agent 验收
 
@@ -66,7 +71,7 @@ description: Coordinate complex coding and knowledge-work tasks with Codex's cur
 4. 对抗验证：隐藏假设和高风险异议已被挑战与裁决。
 5. 使用证明：真实入口可用，冷启动路径成立。
 
-未验证项必须显式标注。详见 [references/acceptance.md](references/acceptance.md)，一线纪律见 [references/worker-handbook.md](references/worker-handbook.md)。
+未验证项必须显式标注。写回执、diff、分页列表和状态快照都不是终态证据；关键结论按 [references/ground-truth-discipline.md](references/ground-truth-discipline.md) 核产物、全文、全量与对照。完整验收见 [references/acceptance.md](references/acceptance.md)，一线纪律见 [references/worker-handbook.md](references/worker-handbook.md)。
 
 ## 维护
 

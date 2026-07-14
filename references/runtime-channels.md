@@ -18,16 +18,16 @@
 ## 创建 Agent
 
 - Explorer：只读，要求返回路径、定位、证据、风险和未验证项。
-- Worker：指定 task id、owned files/modules、依赖基线、验收、预算和集成 owner。
+- Worker：指定 task id、连贯语义面、预期路径、冲突/保护面、依赖基线、验收、预算和集成 owner。
 - Reviewer：只读，提供原始目标、目标 diff/文件和要挑战的问题；避免泄露预设结论。
 - 只传完成工作所需的最小上下文。需要继承对话时使用有限或完整 fork；任务自包含时可不 fork。
 - 主 Agent 保留关键路径；派出后继续做不重叠工作。
 
 ## 任务图与并发预算
 
-每条线记录：`id / owner / depends_on / write_set / acceptance / budget / status`。
+每条线记录：`id / owner / depends_on / semantic_scope / expected_write_set / forbidden_write_set / acceptance / budget / status`。
 
-只有依赖满足且写面不冲突的节点才进入 ready。共享文件、高耦合核心模块和最终集成保持单写者。若 A 的结果会改变 B 的接口或语义，B 只能先做只读侦察或等待，不能凭冻结假设盲写。
+只有依赖满足且写面不冲突的节点才进入 ready。共享文件、高耦合核心模块和最终集成保持单写者。预期写面是调度地图，不是阅读围栏；Worker 若发现必要的新路径，先确认它不属于其他在飞线或保护面，再修改并在回传中显式列出。若 A 的结果会改变 B 的接口或语义，B 只能先做只读侦察或等待。
 
 按“预计关键路径缩短 − 委托与集成成本”判断并发收益。不要填满槽位作为完成度指标；容量允许时预留一个槽给临时诊断或复核。
 
@@ -38,6 +38,7 @@
 - 不让多个 Worker 写相同文件或高耦合模块。
 - 不回退、覆盖或格式化无关的现有改动。
 - 用唯一 ownership 和频繁 diff 回读防止碰撞。
+- 脏文件本身不证明某条线仍在运行；以内部 Agent 状态、活 task/progress 和实际产物互证。
 
 若运行时提供隔离工作区，仍由主 Agent 指定集成 owner 并在目标工作区 fresh 验证；不要假设分支通过等于集成通过。
 
@@ -45,7 +46,7 @@
 
 每次事件或检查都必须产生动作：回收并验证、补上下文、释放下一节点、打断、接管或向用户升级。
 
-1. 查 Agent 状态、文件/diff、测试或日志四类 ground-truth。
+1. 查 Agent 状态、Harness task/progress、文件/diff、测试或日志等独立 ground-truth。
 2. 完成结果先按 claim 回读；失败结果按停止条件缩小、纠偏或接管。
 3. 依赖满足后释放下一批 ready 节点。
 4. Harness 启用时写 progress/evidence，并向用户给出简短实质更新。
@@ -57,5 +58,5 @@
 
 - 第一次失败：依据新证据补上下文、缩小任务或改验收入口。
 - 第二次同类失败且无新证据：熔断，不再重派；主 Agent 接管或向用户升级。
-- Agent 越界或写面碰撞：立即打断，保存已产生证据，由主 Agent裁决 ownership。
+- Agent 越界或写面碰撞：立即打断，保存已产生证据，由主 Agent 裁决 ownership。
 - 内部 Agent 工具不可用或容量不足：由主 Agent 串行完成。

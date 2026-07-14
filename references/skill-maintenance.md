@@ -8,11 +8,12 @@
 - `role-matrix.md`：角色责任与禁止项。
 - `runtime-channels.md`：内部工具、并发预算、监管和失败恢复。
 - `delegation-templates.md`：brief 与 prompt 契约。
-- `harness-orchestration.md`：检测到 Harness 时的条件性投影。
+- `harness-orchestration.md`：在用户目标仓库中使用 Harness Anything 的条件性投影与 CLI 适配。
+- `ground-truth-discipline.md`：回执、全文、全量、终态与对照纪律。
 - `acceptance.md`：ground-truth、编排完整性和使用证明。
 - `worker-handbook.md`：一线 Worker 纪律。
 
-不要新增 README、CHANGELOG 或 QUICK_REFERENCE。
+不要新增 CHANGELOG 或 QUICK_REFERENCE。
 
 ## 不变量
 
@@ -38,3 +39,5 @@
 4. 内部 Agent 两次失败：熔断并由主 Agent 本地接管。
 5. Harness 多协作者无 claim：查 task/progress、声明写面，碰撞时停手升级。
 6. 内部 Agent 工具不可用：由主 Agent 串行完成或说明限制。
+7. 用户目标仓库升级 `ha` 命令面：应通过 capabilities/help 重新发现，不沿用冻结参数。
+8. Harness Anything 自身存在仓库专属流程：不得把这些约定复制到本技能。
