@@ -55,6 +55,20 @@ description: Coordinate complex coding and knowledge-work tasks inside a user's 
 6. 按依赖顺序集成并运行 fresh verification；各线分别通过不等于整体通过。
 7. 完成、需用户裁决或自主面穷尽时，回收/打断遗留 Agent 并一次性收口。
 
+## Reference 路由矩阵
+
+按当前命中的场景读取，不要一次性加载全部 Reference。
+
+| 触发场景 | 必读 Reference | 用它解决什么 |
+|---|---|---|
+| 准备首个派活包或 orchestration brief | [delegation-templates.md](references/delegation-templates.md) | 五问契约、任务图、Explorer/Worker/Reviewer prompt 和收口格式 |
+| 角色、权限、ownership 或写面边界不清 | [role-matrix.md](references/role-matrix.md) + [worker-handbook.md](references/worker-handbook.md) | 谁负责什么、哪些边界不可越、Worker 如何开工和回传 |
+| 创建、补充、等待、打断或并发管理内部 Agent | [runtime-channels.md](references/runtime-channels.md) | 协作工具映射、并发预算、共享工作区、监管与失败恢复 |
+| 目标仓库启用 Harness Anything，或准备执行任何 `ha` 写操作 | [harness-orchestration.md](references/harness-orchestration.md) | capabilities 驱动的 CLI 发现、原语映射、权责、证据和收口门 |
+| 需要相信“已写入”“无发现”“已通过”或“与改动无关” | [ground-truth-discipline.md](references/ground-truth-discipline.md) | 产物回读、全文/全量核验、终态判断、阳性与阴性对照 |
+| 集成、review、complete 或最终交付 | [acceptance.md](references/acceptance.md) | 功能、语义、编排、对抗、使用性验收与原始语义勾核 |
+| 修改本技能 | [skill-maintenance.md](references/skill-maintenance.md) | 内容边界、更新流程、行为场景和反熵增规则 |
+
 ## Harness 投影
 
 本技能用于在**用户自己的目标仓库**中使用 Harness Anything，不携带 Harness Anything 源码仓库的开发流程。检测到 `harness/harness.yaml` 或目标仓治理明确要求时，仅在已有 task、非平凡多协作者工作、跨回合监管或承重证据需要时投影任务图。短小单步任务不因 Harness 存在自动新建 task。
