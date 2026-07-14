@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex 内部 Agent 编排"
+  short_description: "仅用 Codex 内部 Agent 完成复杂任务编排"
+  default_prompt: "使用 $codex-internal-agent-orchestration 仅通过 Codex 内部 Agent 规划、委派、回收证据并完成验收。"
